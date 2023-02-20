@@ -22,17 +22,42 @@ struct list_head *q_new()
 }
 
 /* Free all storage used by queue */
-void q_free(struct list_head *l) {}
+void q_free(struct list_head *l)
+{
+    if (!l)
+        return;
+    struct list_head *cur_node;
+    struct list_head *safe;
+    list_for_each_safe (cur_node, safe,
+                        l) /*go over nodes from (l->next) to the end of list*/
+    {
+        list_del(cur_node);
+        /*struct list_head *next = cur_node->next;
+          struct list_head *prev = cur_node->prev;
+          next->prev = prev;
+          prev->next = next;*/
+        free(cur_node);
+    }
+    free(l);
+}
 
 /* Insert an element at head of queue */
 bool q_insert_head(struct list_head *head, char *s)
 {
+    if (!head)
+        return false;
+    struct list_head *node = malloc(sizeof(*node));
+    list_add(node, head);
     return true;
 }
 
 /* Insert an element at tail of queue */
 bool q_insert_tail(struct list_head *head, char *s)
 {
+    if (!head)
+        return false;
+    struct list_head *node = malloc(sizeof(*node));
+    list_add_tail(node, head);
     return true;
 }
 
