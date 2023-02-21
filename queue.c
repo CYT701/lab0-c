@@ -36,7 +36,7 @@ void q_free(struct list_head *l)
 }
 
 #ifndef strlcpy
-#define strlcpy(dst, src, sz) snprintf((dst), (sz), "%s", (src))
+#define strlcpy(dst, src, size) snprintf((dst), (size), "%s", (src))
 #endif
 
 /* Insert an element at head of queue */
@@ -68,26 +68,60 @@ bool q_insert_tail(struct list_head *head, char *s)
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!head || list_empty(head))
+        return NULL;
+    element_t *rm_element = list_first_entry(head, element_t, list);
+    list_del(&rm_element->list);
+    if (sp) {
+        strlcpy(sp, rm_element->value, bufsize);
+    }
+    return rm_element;
 }
 
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!head || list_empty(head))
+        return NULL;
+    element_t *rm_element = list_last_entry(head, element_t, list);
+    list_del(&rm_element->list);
+    if (sp) {
+        strlcpy(sp, rm_element->value, bufsize);
+    }
+    return rm_element;
 }
 
 /* Return number of elements in queue */
 int q_size(struct list_head *head)
 {
-    return -1;
+    if (!head)
+        return 0;
+    int count = 0;
+    struct list_head *cur_node;
+    list_for_each (cur_node, head)
+        count = count + 1;
+    return count;
 }
 
 /* Delete the middle node in queue */
 bool q_delete_mid(struct list_head *head)
 {
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
-    return true;
+    if (!head || list_empty(head))
+        return false;
+    int mid = q_size(head) / 2 + q_size(head) % 2;
+    int count = 0;
+    struct list_head *cur_node;
+    struct list_head *safe;
+    list_for_each_safe (cur_node, safe, head) {
+        count = count + 1;
+        if (count == mid) {
+            list_del(cur_node);
+            q_release_element(list_entry(cur_node, element_t, list));
+            return true;
+        }
+    }
+    return false;
 }
 
 /* Delete all nodes that have duplicate string */
