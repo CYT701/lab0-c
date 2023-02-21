@@ -109,8 +109,8 @@ bool q_delete_mid(struct list_head *head)
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
     if (!head || list_empty(head))
         return false;
-    int mid = q_size(head) / 2 + q_size(head) % 2;
-    int count = 0;
+    int mid = (q_size(head) - 1) / 2; /*middle of 0-based indexing*/
+    int count = -1;                   /*count 0 at first node*/
     struct list_head *cur_node;
     struct list_head *safe;
     list_for_each_safe (cur_node, safe, head) {
