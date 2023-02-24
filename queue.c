@@ -128,6 +128,22 @@ bool q_delete_mid(struct list_head *head)
 bool q_delete_dup(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
+    if (!head || list_empty(head))
+        return false;
+    bool is_dup = false; /*check if cur_node is duplicate*/
+    element_t *cur_node;
+    element_t *safe;
+    list_for_each_entry_safe (cur_node, safe, head, list) {
+        if (strcmp(cur_node->value, safe->value) == 0) {
+            is_dup = true;
+            list_del(&cur_node->list);
+            q_release_element(cur_node);
+        } else if (is_dup) { /*cur_node is duplicate, delete it*/
+            is_dup = false;
+            list_del(&cur_node->list);
+            q_release_element(cur_node);
+        }
+    }
     return true;
 }
 
@@ -135,15 +151,48 @@ bool q_delete_dup(struct list_head *head)
 void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
+    if (!head)
+        return;
+    struct list_head *cur_node;
+    struct list_head *save;
+    list_for_each_safe (cur_node, save, head) {
+        list_move(cur_node, save);
+    }
 }
 
 /* Reverse elements in queue */
-void q_reverse(struct list_head *head) {}
+void q_reverse(struct list_head *head)
+{
+    if (!head)
+        return;
+    struct list_head *cur_node;
+    struct list_head *safe;
+    list_for_each_safe (cur_node, safe, head) {
+        list_move(cur_node, head);
+    }
+}
 
 /* Reverse the nodes of the list k at a time */
 void q_reverseK(struct list_head *head, int k)
 {
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
+    if (!head || list_empty(head))
+        return;
+    LIST_HEAD(temp_head);
+    struct list_head *cur_node;
+    struct list_head *safe;
+    struct list_head *from = head;
+    int count = 0;
+    list_for_each_safe (cur_node, safe, head) {
+        count = count + 1;
+        if (count == k) {
+            list_cut_position(&temp_head, from, cur_node);
+            q_reverse(&temp_head);
+            list_splice_init(&temp_head, from);
+            count = 0;
+            from = safe->prev;
+        }
+    }
 }
 
 /* Sort elements of queue in ascending order */
