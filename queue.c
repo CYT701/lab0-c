@@ -46,8 +46,16 @@ bool q_insert_head(struct list_head *head, char *s)
         return false;
     }
     element_t *new_element = malloc(sizeof(element_t));
-    new_element->value = malloc(sizeof(s));
-    strlcpy(new_element->value, s, sizeof(&new_element->value));
+    if (!new_element) {
+        return false;
+    }
+    int length = strlen(s) + 1;
+    new_element->value = malloc(sizeof(char) * length);
+    if (!new_element->value) {
+        free(new_element);
+        return false;
+    }
+    strlcpy(new_element->value, s, length);
     list_add(&new_element->list, head);
     return true;
 }
@@ -59,8 +67,16 @@ bool q_insert_tail(struct list_head *head, char *s)
         return false;
     }
     element_t *new_element = malloc(sizeof(element_t));
-    new_element->value = malloc(sizeof(s));
-    strlcpy(new_element->value, s, sizeof(&new_element->value));
+    if (!new_element) {
+        return false;
+    }
+    int length = strlen(s) + 1;
+    new_element->value = malloc(sizeof(char) * length);
+    if (!new_element->value) {
+        free(new_element);
+        return false;
+    }
+    strlcpy(new_element->value, s, length);
     list_add_tail(&new_element->list, head);
     return true;
 }
@@ -278,5 +294,21 @@ int q_descend(struct list_head *head)
 int q_merge(struct list_head *head)
 {
     // https://leetcode.com/problems/merge-k-sorted-lists/
-    return 0;
+    if (!head || list_empty(head)) {
+        return 0;
+    }
+    if (list_is_singular(head)) {
+        return list_entry(head->next, queue_contex_t, chain)->size;
+    }
+    queue_contex_t *merged_list = list_entry(head->next, queue_contex_t, chain);
+    struct list_head *node = NULL, *safe = NULL;
+    list_for_each_safe (node, safe, head) {
+        if (node == head->next) {
+            continue;
+        }
+        queue_contex_t *temp = list_entry(node, queue_contex_t, chain);
+        list_splice_init(temp->q, merged_list->q);
+    }
+    q_sort(merged_list->q);
+    return merged_list->size;
 }
